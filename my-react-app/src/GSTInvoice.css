@@ -1,0 +1,587 @@
+/* ===== GST Invoice Form — Mobile-First Styles ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* Remove arrows/spinners from number inputs */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+    /* Firefox */
+}
+
+.gst-form-wrapper {
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+    background: #f0f2f5;
+    padding-bottom: 100px;
+}
+
+/* ---------- Top Navigation Bar ---------- */
+.gst-form-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+.gst-form-header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.gst-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.gst-back-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.gst-header-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+}
+
+.gst-generate-btn-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: #e94560;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(233, 69, 96, 0.3);
+}
+
+.gst-generate-btn-header:hover {
+    background: #d63851;
+    transform: translateY(-1px);
+}
+
+/* ---------- Content ---------- */
+.gst-form-content {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+/* ---------- Section Cards ---------- */
+.gst-section {
+    background: #ffffff;
+    border-radius: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+    animation: gstFadeIn 0.3s ease-out;
+}
+
+.gst-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, #f8f9fa, #ffffff);
+    border-bottom: 1px solid #e9ecef;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.gst-section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.gst-section-icon {
+    font-size: 1.1rem;
+}
+
+.gst-section-toggle {
+    font-size: 0.8rem;
+    color: #6c757d;
+    transition: transform 0.3s ease;
+}
+
+.gst-section-toggle.open {
+    transform: rotate(180deg);
+}
+
+.gst-section-body {
+    padding: 16px;
+}
+
+.gst-section-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.gst-small-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.gst-btn-outline-blue {
+    background: rgba(52, 152, 219, 0.08);
+    color: #3498db;
+}
+
+.gst-btn-outline-blue:hover {
+    background: #3498db;
+    color: white;
+}
+
+.gst-btn-outline-green {
+    background: rgba(46, 204, 113, 0.08);
+    color: #2ecc71;
+}
+
+.gst-btn-outline-green:hover {
+    background: #2ecc71;
+    color: white;
+}
+
+.gst-btn-outline-red {
+    background: rgba(231, 76, 60, 0.08);
+    color: #e74c3c;
+}
+
+.gst-btn-outline-red:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+/* ---------- Form Fields (Stacked for Mobile) ---------- */
+.gst-field {
+    margin-bottom: 14px;
+}
+
+.gst-field-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.gst-field-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    color: #1a1a2e;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.gst-field-input:focus {
+    border-color: #3498db;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
+}
+
+.gst-field-input::placeholder {
+    color: #adb5bd;
+}
+
+.gst-field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* ---------- Item Cards (Mobile Friendly) ---------- */
+.gst-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.gst-item-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #e9ecef;
+    position: relative;
+    animation: gstSlideUp 0.3s ease-out;
+}
+
+.gst-item-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.gst-item-number {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: white;
+    background: #1a1a2e;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.gst-item-amount {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.gst-item-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(231, 76, 60, 0.08);
+    color: #e74c3c;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.gst-item-remove:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+.gst-item-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.gst-item-grid-full {
+    grid-column: 1 / -1;
+}
+
+.gst-add-item-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    background: rgba(52, 152, 219, 0.06);
+    color: #3498db;
+    border: 2px dashed #3498db;
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.gst-add-item-btn:hover {
+    background: rgba(52, 152, 219, 0.12);
+}
+
+/* ---------- Customer Cache List ---------- */
+.gst-cache-list {
+    max-height: 160px;
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    margin-bottom: 14px;
+}
+
+.gst-cache-item {
+    padding: 10px 14px;
+    border-bottom: 1px solid #e9ecef;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.gst-cache-item:last-child {
+    border-bottom: none;
+}
+
+.gst-cache-item:hover,
+.gst-cache-item:active {
+    background: #f0f2f5;
+}
+
+.gst-cache-item-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1a1a2e;
+}
+
+.gst-cache-item-gstin {
+    font-size: 0.72rem;
+    color: #6c757d;
+}
+
+/* ---------- Tax Summary ---------- */
+.gst-tax-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.gst-tax-row:last-child {
+    border-bottom: none;
+}
+
+.gst-tax-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.gst-tax-value {
+    font-size: 0.85rem;
+    color: #1a1a2e;
+    font-weight: 600;
+}
+
+.gst-tax-row-edit {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gst-tax-input {
+    width: 80px;
+    padding: 6px 10px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    text-align: center;
+    outline: none;
+    background: #f8f9fa;
+}
+
+.gst-tax-input:focus {
+    border-color: #3498db;
+    background: white;
+}
+
+.gst-round-off-btn {
+    padding: 4px 12px;
+    background: rgba(52, 152, 219, 0.08);
+    color: #3498db;
+    border: none;
+    border-radius: 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.gst-round-off-btn:hover {
+    background: #3498db;
+    color: white;
+}
+
+/* ---------- Grand Total ---------- */
+.gst-grand-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: linear-gradient(135deg, #1a1a2e, #0f3460);
+    border-radius: 12px;
+    margin-top: 16px;
+}
+
+.gst-grand-total-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.gst-grand-total-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: white;
+}
+
+/* ---------- Words Section ---------- */
+.gst-words-box {
+    padding: 12px 14px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-style: italic;
+    color: #495057;
+    line-height: 1.5;
+}
+
+/* ---------- Sticky Generate Button ---------- */
+.gst-sticky-generate {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 16px;
+    background: white;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    display: flex;
+    gap: 10px;
+}
+
+.gst-generate-btn {
+    flex: 1;
+    padding: 14px;
+    background: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+}
+
+.gst-generate-btn:hover {
+    background: #27ae60;
+    transform: translateY(-1px);
+}
+
+/* ---------- Animations ---------- */
+@keyframes gstFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes gstSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---------- Responsive ---------- */
+@media (min-width: 576px) {
+    .gst-form-content {
+        padding: 20px;
+    }
+
+    .gst-section-body {
+        padding: 20px;
+    }
+
+    .gst-item-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .gst-header-title {
+        font-size: 1.25rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .gst-form-content {
+        padding: 24px;
+    }
+
+    .gst-two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .gst-item-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ---------- Date picker fix for mobile ---------- */
+.gst-field .react-datepicker-wrapper {
+    width: 100%;
+}
+
+.gst-field .react-datepicker__input-container input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    color: #1a1a2e;
+    background: #f8f9fa;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.gst-field .react-datepicker__input-container input:focus {
+    border-color: #3498db;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
+}
