@@ -13,6 +13,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/customers', customerRoutes);
+app.use('/api/invoices', require('./routes/invoices'));
 
 // Health check
 app.get('/api/health', (req, res) => {

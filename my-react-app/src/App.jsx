@@ -98,32 +98,43 @@ function GSTInvoiceGenerator() {
     };
     fetchCustomers();
 
-    // Check if we are editing an existing invoice
+
+
+    // Check if we are editing an existing invoice (ID passed from Dashboard)
     const editId = localStorage.getItem('editInvoiceId');
     if (editId) {
-      const savedInvoices = JSON.parse(localStorage.getItem('savedInvoices') || '[]');
-      const invoiceToEdit = savedInvoices.find(inv => inv.id === editId);
-      if (invoiceToEdit) {
-        setEditingId(editId);
-        setCustomerInfo({
-          name: invoiceToEdit.customerName || '',
-          address: invoiceToEdit.customerAddress || '',
-          gstin: invoiceToEdit.customerGstin || '',
-          state: invoiceToEdit.customerState || '',
-          stateCode: invoiceToEdit.customerStateCode || '',
+      fetch(`${API_BASE}/invoices/${editId}`)
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error("Invoice not found");
+        })
+        .then(invoiceToEdit => {
+          setEditingId(editId);
+          setCustomerInfo({
+            name: invoiceToEdit.customerName || '',
+            address: invoiceToEdit.customerAddress || '',
+            gstin: invoiceToEdit.customerGstin || '',
+            state: invoiceToEdit.customerState || '',
+            stateCode: invoiceToEdit.customerStateCode || '',
+          });
+          setInvoiceInfo({
+            number: invoiceToEdit.invoiceNumber || '',
+            date: invoiceToEdit.invoiceDate ? new Date(invoiceToEdit.invoiceDate) : new Date(),
+          });
+          if (invoiceToEdit.items && invoiceToEdit.items.length > 0) {
+            setItems(invoiceToEdit.items);
+          }
+          setCgstRate(invoiceToEdit.cgstRate ?? 2.5);
+          setSgstRate(invoiceToEdit.sgstRate ?? 2.5);
+          setRoundOff(invoiceToEdit.roundOff ?? 0);
+        })
+        .catch(err => {
+          console.error("Error fetching invoice for edit:", err);
+          alert("Could not load invoice details.");
+        })
+        .finally(() => {
+          localStorage.removeItem('editInvoiceId');
         });
-        setInvoiceInfo({
-          number: invoiceToEdit.invoiceNumber || '',
-          date: invoiceToEdit.invoiceDate ? new Date(invoiceToEdit.invoiceDate) : new Date(),
-        });
-        if (invoiceToEdit.items && invoiceToEdit.items.length > 0) {
-          setItems(invoiceToEdit.items);
-        }
-        setCgstRate(invoiceToEdit.cgstRate ?? 2.5);
-        setSgstRate(invoiceToEdit.sgstRate ?? 2.5);
-        setRoundOff(invoiceToEdit.roundOff ?? 0);
-      }
-      localStorage.removeItem('editInvoiceId');
     }
   }, []);
 
@@ -395,27 +406,36 @@ function GSTInvoiceGenerator() {
       amountInWords
     };
 
-    // --- Save to savedInvoices array in localStorage ---
-    const savedInvoices = JSON.parse(localStorage.getItem('savedInvoices') || '[]');
-    if (editingId) {
-      // Replace existing invoice
-      const idx = savedInvoices.findIndex(inv => inv.id === editingId);
-      if (idx >= 0) {
-        savedInvoices[idx] = invoiceData;
-      } else {
-        savedInvoices.unshift(invoiceData);
-      }
-    } else {
-      // Add new invoice at the beginning
-      savedInvoices.unshift(invoiceData);
-    }
-    localStorage.setItem('savedInvoices', JSON.stringify(savedInvoices));
 
-    // Store invoice data for the template viewer
-    localStorage.setItem('invoiceData', JSON.stringify(invoiceData));
+    // --- Save to Backend (MongoDB) ---
+    const method = editingId ? 'PUT' : 'POST';
+    const url = editingId ? `${API_BASE}/invoices/${editingId}` : `${API_BASE}/invoices`;
 
-    // Navigate to the invoice template page
-    navigate('/invoice');
+    // Remove _id from body if it exists, to avoid immutable field error on some setups, 
+    // although Mongoose usually ignores it if matches. Best to be clean.
+    const { _id, ...bodyData } = invoiceData;
+
+    fetch(url, {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bodyData)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to save invoice');
+        return res.json();
+      })
+      .then(savedInvoice => {
+        // Success
+        console.log("Invoice saved:", savedInvoice);
+        // Important: We still save to localStorage ONLY for the Preview page (InvoiceTemplate.jsx) 
+        // because it reads from there. We DON'T save to 'savedInvoices' list anymore.
+        localStorage.setItem('invoiceData', JSON.stringify(invoiceData));
+        navigate('/invoice');
+      })
+      .catch(err => {
+        console.error("Error saving invoice:", err);
+        alert("Error saving invoice to database: " + err.message);
+      });
   };
 
   // Update totals whenever relevant values change

@@ -8,17 +8,41 @@ function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // Load invoices from localStorage on mount
+
+  // API base URL
+  const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
+  const [monthWiseData, setMonthWiseData] = useState({});
+
+  // Load invoices and summary from Backend on mount
   useEffect(() => {
-    const saved = localStorage.getItem('savedInvoices');
-    if (saved) {
-      try {
-        setInvoices(JSON.parse(saved));
-      } catch {
-        setInvoices([]);
-      }
-    }
+    fetchInvoices();
+    fetchSummary();
   }, []);
+
+  const fetchInvoices = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/invoices`);
+      if (res.ok) {
+        const data = await res.json();
+        setInvoices(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch invoices", err);
+    }
+  };
+
+  const fetchSummary = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/invoices/summary`);
+      if (res.ok) {
+        const data = await res.json();
+        setMonthWiseData(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch summary", err);
+    }
+  };
 
   // --- Derived data ---
   const filteredInvoices = invoices.filter((inv) => {
@@ -31,44 +55,8 @@ function Dashboard() {
 
   const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.grandTotal || 0), 0);
 
-  // Group by Month logic
-  const monthWiseData = invoices.reduce((acc, inv) => {
-    if (!inv.invoiceDate) return acc;
-    const date = new Date(inv.invoiceDate);
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; // YYYY-MM
-
-    if (!acc[key]) {
-      acc[key] = {
-        label: date.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }),
-        count: 0,
-        subtotal: 0,
-        cgst: 0,
-        sgst: 0,
-        totalTax: 0,
-        grandTotal: 0,
-        invoices: []
-      };
-    }
-
-    const cgst = inv.cgstAmount || 0;
-    const sgst = inv.sgstAmount || 0;
-    const tax = cgst + sgst; // Calculate total tax from components, or use inv.totalTax if reliable
-
-    acc[key].count += 1;
-    acc[key].subtotal += (inv.subtotal || 0);
-    acc[key].cgst += cgst;
-    acc[key].sgst += sgst;
-    acc[key].totalTax += tax;
-    acc[key].grandTotal += (inv.grandTotal || 0);
-    acc[key].invoices.push(inv);
-
-    return acc;
-  }, {});
-
-  // Sort invoices within each month by date desc
-  Object.values(monthWiseData).forEach(month => {
-    month.invoices.sort((a, b) => new Date(b.invoiceDate) - new Date(a.invoiceDate));
-  });
+  // Month wise data is now fetched from API (fetchSummary)
+  // No need to calculate client-side anymore.
 
   // --- Actions ---
   const [selectedMonth, setSelectedMonth] = useState(null);
@@ -86,7 +74,7 @@ function Dashboard() {
 
   const handleEdit = (invoice) => {
     // Store the invoice ID so the form knows to load it
-    localStorage.setItem('editInvoiceId', invoice.id);
+    localStorage.setItem('editInvoiceId', invoice._id);
     // Also store the data so the form can pre-fill
     localStorage.setItem('invoiceData', JSON.stringify(invoice));
     navigate('/create');
@@ -101,12 +89,27 @@ function Dashboard() {
     setDeleteTarget(invoice);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteTarget) return;
-    const updated = invoices.filter((inv) => inv.id !== deleteTarget.id);
-    setInvoices(updated);
-    localStorage.setItem('savedInvoices', JSON.stringify(updated));
-    setDeleteTarget(null);
+
+    try {
+      const res = await fetch(`${API_BASE}/invoices/${deleteTarget._id}`, {
+        method: 'DELETE'
+      });
+
+      if (res.ok) {
+        // Update local state
+        setInvoices(prev => prev.filter(inv => inv._id !== deleteTarget._id));
+        // Refresh summary as well
+        fetchSummary();
+        setDeleteTarget(null);
+      } else {
+        alert("Failed to delete invoice");
+      }
+    } catch (err) {
+      console.error("Delete error", err);
+      alert("Error connecting to server");
+    }
   };
 
   const formatDate = (dateStr) => {
@@ -272,7 +275,7 @@ function Dashboard() {
           /* ----- Invoice List ----- */
           <div className="invoice-list">
             {filteredInvoices.map((invoice) => (
-              <div className="invoice-card" key={invoice.id}>
+              <div className="invoice-card" key={invoice._id}>
                 <div className="invoice-card-header">
                   <span className="invoice-number">#{invoice.invoiceNumber || 'N/A'}</span>
                   <span className="invoice-date">{formatDate(invoice.invoiceDate)}</span>
