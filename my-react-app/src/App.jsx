@@ -121,8 +121,10 @@ function GSTInvoiceGenerator() {
             number: invoiceToEdit.invoiceNumber || '',
             date: invoiceToEdit.invoiceDate ? new Date(invoiceToEdit.invoiceDate) : new Date(),
           });
-          if (invoiceToEdit.items && invoiceToEdit.items.length > 0) {
+          if (invoiceToEdit.items && Array.isArray(invoiceToEdit.items) && invoiceToEdit.items.length > 0) {
             setItems(invoiceToEdit.items);
+          } else {
+            setItems([{ id: Date.now().toString(), description: '', weight: '0', hsnCode: '', quantity: 0, rate: 0, amount: 0 }]);
           }
           setCgstRate(invoiceToEdit.cgstRate ?? 2.5);
           setSgstRate(invoiceToEdit.sgstRate ?? 2.5);

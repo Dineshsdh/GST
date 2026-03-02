@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FixedSizeList as List } from 'react-window';
 import './Dashboard.css';
 
 function Dashboard() {
@@ -52,12 +51,12 @@ function Dashboard() {
         setTotalCount(data.totalCount);
 
         if (currentPage === 1) {
-          setInvoices(data.invoices);
+          setInvoices(data.invoices || []);
         } else {
-          setInvoices(prev => [...prev, ...data.invoices]);
+          setInvoices(prev => [...prev, ...(data.invoices || [])]);
         }
 
-        if (currentPage >= data.totalPages) {
+        if (currentPage >= (data.totalPages || 0)) {
           setHasMore(false);
         }
       }
@@ -150,69 +149,47 @@ function Dashboard() {
     });
   };
 
-  // Virtualized Row Component
-  const Row = useCallback(({ index, style }) => {
-    const invoice = invoices[index];
-    if (!invoice) return null; // Fallback
-
-    return (
-      <div style={style} key={invoice._id}>
-        {/* Wrap in inner div to apply margin/padding without breaking react-window height calculations */}
-        <div style={{ padding: '0 8px', height: '100%', boxSizing: 'border-box' }}>
-          <div className="invoice-card" style={{ height: 'calc(100% - 14px)', margin: '0 0 14px 0' }}>
-            <div className="invoice-card-header">
-              <span className="invoice-number">#{invoice.invoiceNumber || 'N/A'}</span>
-              <span className="invoice-date">{formatDate(invoice.invoiceDate)}</span>
-            </div>
-
-            <div className="invoice-card-body">
-              <span className="customer-name">{invoice.customerName || 'Unknown Customer'}</span>
-              <span className="invoice-amount">
-                <span className="invoice-amount-currency">₹</span>
-                {formatCurrency(invoice.grandTotal)}
-              </span>
-              {invoice.paymentStatus && (
-                <span className={`payment-status status-${invoice.paymentStatus.toLowerCase()}`}>
-                  {invoice.paymentStatus}
-                </span>
-              )}
-            </div>
-
-            <div className="invoice-items-summary">
-              {invoice.itemCount} item{invoice.itemCount > 1 ? 's' : ''}
-              {invoice.itemsSummary && invoice.itemsSummary.length > 0 && (
-                <span> &bull; {invoice.itemsSummary.map(i => i.description).join(', ')}{invoice.itemCount > 3 ? '...' : ''}</span>
-              )}
-            </div>
-
-            <div className="invoice-actions">
-              <button
-                className="action-btn action-btn-view"
-                onClick={() => handleViewInvoice(invoice)}
-                title="View Invoice"
-              >
-                <span className="action-icon">👁</span> View
-              </button>
-              <button
-                className="action-btn action-btn-edit"
-                onClick={() => handleEdit(invoice)}
-                title="Edit Invoice"
-              >
-                <span className="action-icon">✏️</span> Edit
-              </button>
-              <button
-                className="action-btn action-btn-delete"
-                onClick={() => confirmDelete(invoice)}
-                title="Delete Invoice"
-              >
-                <span className="action-icon">🗑</span> Delete
-              </button>
-            </div>
-          </div>
-        </div>
+  // Invoice Card Component (memoized)
+  const InvoiceCard = useCallback(({ invoice }) => (
+    <div className="invoice-card" key={invoice._id}>
+      <div className="invoice-card-header">
+        <span className="invoice-number">#{invoice.invoiceNumber || 'N/A'}</span>
+        <span className="invoice-date">{formatDate(invoice.invoiceDate)}</span>
       </div>
-    );
-  }, [invoices, handleViewInvoice, handleEdit, confirmDelete]);
+
+      <div className="invoice-card-body">
+        <span className="customer-name">{invoice.customerName || 'Unknown Customer'}</span>
+        <span className="invoice-amount">
+          <span className="invoice-amount-currency">₹</span>
+          {formatCurrency(invoice.grandTotal)}
+        </span>
+        {invoice.paymentStatus && (
+          <span className={`payment-status status-${invoice.paymentStatus.toLowerCase()}`}>
+            {invoice.paymentStatus}
+          </span>
+        )}
+      </div>
+
+      <div className="invoice-items-summary">
+        {invoice.itemCount} item{invoice.itemCount > 1 ? 's' : ''}
+        {invoice.itemsSummary && invoice.itemsSummary.length > 0 && (
+          <span> &bull; {invoice.itemsSummary.map(i => i.description).join(', ')}{invoice.itemCount > 3 ? '...' : ''}</span>
+        )}
+      </div>
+
+      <div className="invoice-actions">
+        <button className="action-btn action-btn-view" onClick={() => handleViewInvoice(invoice)} title="View Invoice">
+          <span className="action-icon">👁</span> View
+        </button>
+        <button className="action-btn action-btn-edit" onClick={() => handleEdit(invoice)} title="Edit Invoice">
+          <span className="action-icon">✏️</span> Edit
+        </button>
+        <button className="action-btn action-btn-delete" onClick={() => confirmDelete(invoice)} title="Delete Invoice">
+          <span className="action-icon">🗑</span> Delete
+        </button>
+      </div>
+    </div>
+  ), [handleViewInvoice, handleEdit, confirmDelete]);
 
 
   return (
@@ -333,27 +310,26 @@ function Dashboard() {
             )}
           </div>
         ) : (
-          /* ----- Virtualized Invoice List ----- */
-          <div className="invoice-list-container" style={{ width: '100%', height: 'calc(100vh - 250px)', minHeight: '500px' }}>
-            <List
-              height={600} // Fixed height or you can use AutoSizer for full responsiveness
-              itemCount={invoices.length}
-              itemSize={180} // Estimated height of the card including margin
-              width="100%"
-              className="virtualized-list"
-            >
-              {Row}
-            </List>
+          /* ----- Invoice List ----- */
+          <div className="invoice-list-container">
+            {invoices.map(invoice => (
+              <InvoiceCard key={invoice._id} invoice={invoice} />
+            ))}
 
-            {hasMore && (
+            {isLoading && (
+              <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-secondary)' }}>
+                Loading...
+              </div>
+            )}
+
+            {hasMore && !isLoading && (
               <div style={{ textAlign: 'center', margin: '20px 0' }}>
                 <button
                   className="create-bill-btn"
                   onClick={() => setPage(prev => prev + 1)}
-                  disabled={isLoading}
                   style={{ background: 'var(--text-secondary)' }}
                 >
-                  {isLoading ? 'Loading...' : 'Load More'}
+                  Load More
                 </button>
               </div>
             )}

@@ -61,6 +61,14 @@ export default defineConfig({
       }
     })
   ],
+  optimizeDeps: {
+    include: ['react-window'],
+  },
+  build: {
+    commonjsOptions: {
+      include: [/react-window/, /node_modules/],
+    },
+  },
   server: {
     proxy: {
       '/api': {
