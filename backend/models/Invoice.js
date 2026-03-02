@@ -43,6 +43,7 @@ const invoiceSchema = new mongoose.Schema({
     // Misc
     amountInWords: String,
     paymentStatus: { type: String, enum: ['Paid', 'Unpaid', 'Partial'], default: 'Unpaid' },
+    paidAmount: { type: Number, default: 0 }, // Used when paymentStatus is 'Partial'
 
     // Metadata
     createdAt: { type: Date, default: Date.now }

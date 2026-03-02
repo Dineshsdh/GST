@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
 
         // Fetch paginated invoices with lean and select only required fields
         const invoices = await Invoice.find(query)
-            .select('invoiceNumber invoiceDate customerName grandTotal paymentStatus items') // include items temporarily to count them
+            .select('invoiceNumber invoiceDate customerName grandTotal paymentStatus paidAmount items')
             .sort({ invoiceDate: -1 })
             .skip(skip)
             .limit(limit)
@@ -35,10 +35,8 @@ router.get('/', async (req, res) => {
             customerName: inv.customerName,
             grandTotal: inv.grandTotal,
             paymentStatus: inv.paymentStatus,
+            paidAmount: inv.paidAmount || 0,
             itemCount: inv.items ? inv.items.length : 0,
-            // Keep items array briefly if frontend still expects it directly, 
-            // but requirements say "summary fields only". We will map items just to length.
-            // Returning the first 3 item descriptions could be useful if Frontend needs it:
             itemsSummary: inv.items ? inv.items.slice(0, 3).map(i => ({ description: i.description })) : []
         }));
 
