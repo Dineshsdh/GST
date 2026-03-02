@@ -189,7 +189,7 @@
   padding: 18px;
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
-  animation: slideUp 0.35s ease-out both;
+  /* Removed animation to prevent reruning on virtual list scroll */
   border: 1px solid var(--border);
   position: relative;
   overflow: hidden;
@@ -264,6 +264,31 @@
   font-weight: 500;
   color: var(--text-secondary);
   margin-right: 2px;
+}
+
+/* Payment Status Indicator */
+.payment-status {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-paid {
+  background: rgba(46, 204, 113, 0.15);
+  color: #27ae60;
+}
+
+.status-unpaid {
+  background: rgba(231, 76, 60, 0.15);
+  color: #c0392b;
+}
+
+.status-partial {
+  background: rgba(243, 156, 18, 0.15);
+  color: #d35400;
 }
 
 /* Invoice card item summary */

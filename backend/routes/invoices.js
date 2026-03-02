@@ -2,11 +2,55 @@ const express = require('express');
 const router = express.Router();
 const Invoice = require('../models/Invoice');
 
-// GET /api/invoices - Fetch all invoices (sorted by date desc)
+// GET /api/invoices - Fetch paginated summary of invoices
 router.get('/', async (req, res) => {
     try {
-        const invoices = await Invoice.find().sort({ invoiceDate: -1 });
-        res.json(invoices);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20; // Default limit
+        const skip = (page - 1) * limit;
+        const search = req.query.search || '';
+
+        // Build query
+        const query = {};
+        if (search) {
+            query.$or = [
+                { invoiceNumber: { $regex: search, $options: 'i' } },
+                { customerName: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        // Fetch paginated invoices with lean and select only required fields
+        const invoices = await Invoice.find(query)
+            .select('invoiceNumber invoiceDate customerName grandTotal paymentStatus items') // include items temporarily to count them
+            .sort({ invoiceDate: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
+        // Calculate item counts without returning full items array
+        const summaryInvoices = invoices.map(inv => ({
+            _id: inv._id,
+            invoiceNumber: inv.invoiceNumber,
+            invoiceDate: inv.invoiceDate,
+            customerName: inv.customerName,
+            grandTotal: inv.grandTotal,
+            paymentStatus: inv.paymentStatus,
+            itemCount: inv.items ? inv.items.length : 0,
+            // Keep items array briefly if frontend still expects it directly, 
+            // but requirements say "summary fields only". We will map items just to length.
+            // Returning the first 3 item descriptions could be useful if Frontend needs it:
+            itemsSummary: inv.items ? inv.items.slice(0, 3).map(i => ({ description: i.description })) : []
+        }));
+
+        // Get total count for pagination
+        const totalCount = await Invoice.countDocuments(query);
+
+        res.json({
+            invoices: summaryInvoices,
+            totalCount,
+            totalPages: Math.ceil(totalCount / limit),
+            currentPage: page
+        });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

@@ -42,6 +42,7 @@ const invoiceSchema = new mongoose.Schema({
 
     // Misc
     amountInWords: String,
+    paymentStatus: { type: String, enum: ['Paid', 'Unpaid', 'Partial'], default: 'Unpaid' },
 
     // Metadata
     createdAt: { type: Date, default: Date.now }
@@ -49,5 +50,10 @@ const invoiceSchema = new mongoose.Schema({
 
 // Index for sorting by date
 invoiceSchema.index({ invoiceDate: -1 });
+invoiceSchema.index({ invoiceNumber: 1 });
+invoiceSchema.index({ customerName: 1 });
+invoiceSchema.index({ paymentStatus: 1 });
+// Compound index for frequent dashboard queries
+invoiceSchema.index({ invoiceDate: -1, customerName: 1, paymentStatus: 1 });
 
 module.exports = mongoose.model('Invoice', invoiceSchema);
